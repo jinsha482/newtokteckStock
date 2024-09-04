@@ -7,6 +7,7 @@ import 'package:trading/global/constants/styles/text_styles/text_styles.dart';
 import '../../watch/view/watch_list.view.dart';
 import '../controller/home_screen.controller.dart';
 import '../service/home_screen.service.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 
 class HomeScreen extends StatefulWidget {
@@ -24,7 +25,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor:kWhite.withOpacity(0.1),
+      backgroundColor: kWhite.withOpacity(0.1),
       body: Consumer<HomeScreenController>(
         builder: (context, homeCtrl, child) {
           return Padding(
@@ -35,7 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Gap(70.h),
-                  KStyles().bold22(text: 'Stocks', color:kWhite),
+                  KStyles().bold22(text: 'Stocks', color: kWhite),
                   Gap(2.h),
                   KStyles().bold20(
                     text: homeCtrl.setTime(),
@@ -85,6 +86,14 @@ class _HomeScreenState extends State<HomeScreen> {
                               return symbolA.compareTo(symbolB);
                             });
 
+                        if (filteredAndSortedStocks.isEmpty) {
+                          return Center(
+                            child: KStyles().med14(
+                              text: 'No stocks found for your search.',
+                              color: kWhite,
+                            ),
+                          );
+                        }
                         return Column(
                           children: [
                             ListView.builder(
@@ -103,26 +112,32 @@ class _HomeScreenState extends State<HomeScreen> {
                                       color: isInWatchlist ? kRed : kGreen,
                                     ),
                                     onPressed: () {
-                                        setState(() {
-                                 bool isInWatchlist = watchlist.any((item) => item['symbol'] == stock['symbol']);
-                                   if (isInWatchlist) {
-                                watchlist.removeWhere((item) => item['symbol'] == stock['symbol']);
-                                       } else if (watchlist.length < 2) {
-                                   watchlist.add(stock);
-                                    } else {
-                   
-                                  }
-                          });
+                                      setState(() {
+                                        if (isInWatchlist) {
+                                          watchlist.removeWhere((item) => item['symbol'] == stock['symbol']);
+                                        } else if (watchlist.length < 2) {
+                                          watchlist.add(stock);
+                                        } else {
+                                          Fluttertoast.showToast(
+                                            msg: "You can only add up to 2 stocks to the watchlist.",
+                                            toastLength: Toast.LENGTH_SHORT,
+                                            gravity: ToastGravity.TOP,
+                                            timeInSecForIosWeb: 1,
+                                            backgroundColor: kWhite,
+                                            textColor: kBlack,
+                                            fontSize: 16.0,
+                                          );
+                                        }
+                                      });
                                     },
                                   ),
-                                  
                                 );
                               },
                             ),
                           ],
                         );
                       } else {
-                        return Center(child: KStyles().med14(text: 'No data available'));
+                        return Center(child: KStyles().med14(text: 'No data available', color: kWhite));
                       }
                     },
                   ),
@@ -136,16 +151,13 @@ class _HomeScreenState extends State<HomeScreen> {
         padding: const EdgeInsets.only(bottom: 10),
         child: ElevatedButton(
           onPressed: () {
-            if(watchlist.isNotEmpty ){
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => WatchlistScreen(watchlist: watchlist),
-              ),
-            );
-            }
-            else{
-              
+            if (watchlist.isNotEmpty) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => WatchlistScreen(watchlist: watchlist),
+                ),
+              );
             }
           },
           child: KStyles().med14(text: 'View Watchlist (${watchlist.length}/2)'),

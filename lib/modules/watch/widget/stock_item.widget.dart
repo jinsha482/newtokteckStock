@@ -23,6 +23,7 @@ class StockListItem extends StatelessWidget {
       onTap: onPressed,
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8),
+        color: Colors.transparent, 
         child: Column(
           children: [
             Row(
